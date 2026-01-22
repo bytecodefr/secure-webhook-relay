@@ -1,0 +1,9 @@
+{
+  "name": "secure-webhook-relay",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "node-appwrite": "^21.1.0"
+  }
+}

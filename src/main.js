@@ -448,25 +448,25 @@ const buildBlogPayload = (data, allowEveryone) => {
   const postUrl =
     baseUrl && data.postId ? new URL(`/post/${encodeURIComponent(data.postId)}`, baseUrl).toString() : null;
 
-  const contentLimit = Math.max(200, MAX_MESSAGE_LENGTH - 320);
-  const body = processMarkdownForDiscord(data.content || '', contentLimit, allowEveryone);
+  const contentLimit = Math.min(800, Math.max(200, MAX_MESSAGE_LENGTH - 420));
+  const body = processMarkdownForDiscord(data.content || '', contentLimit, true);
+  const title = sanitizeText(data.title, { maxLength: 200 }) || 'Untitled';
+  const category = sanitizeText(data.category || 'General', { maxLength: 100 }) || 'General';
 
-  let message = `# ${headline}\\n\\n${sanitizeText(data.title, { maxLength: 200 }) || 'Untitled'}\\n\\n${body}`;
+  let message = `# ${headline.toUpperCase()}\n\n${title}\n\n${body}`;
   if (postUrl) {
-    message += `\\n\\nRead the full article: ${postUrl}`;
+    message += `\n\nRead the full article: ${postUrl}`;
   }
-  message += `\\n\\nCategory: *${sanitizeText(data.category || 'General', { maxLength: 100 })}*`;
-  message += `\\nPublished: *${publishDate}*`;
-
-  if (allowEveryone) {
-    message += '\\n\\n@everyone';
-  }
+  message += `\n\nAuthor: *City Government Communications Division*`;
+  message += `\nCategory: *${category}*`;
+  message += `\nPublished: *${publishDate}*`;
+  message += `\n\n@everyone`;
 
   message = truncate(message, MAX_MESSAGE_LENGTH);
 
   return {
     content: message,
-    allowed_mentions: allowEveryone ? { parse: ['everyone'] } : { parse: [] }
+    allowed_mentions: { parse: ['everyone'] }
   };
 };
 

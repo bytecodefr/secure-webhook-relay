@@ -1,5 +1,3 @@
-import { Client, Account } from 'node-appwrite';
-
 const RATE_LIMIT_WINDOW_MS = Number.parseInt(process.env.RATE_LIMIT_WINDOW_MS || '', 10) || 60_000;
 const RATE_LIMIT_MAX = Number.parseInt(process.env.RATE_LIMIT_MAX || '', 10) || 5;
 const MAX_MESSAGE_LENGTH = Number.parseInt(process.env.MAX_MESSAGE_LENGTH || '', 10) || 900;
@@ -516,6 +514,23 @@ const hasAdminLabel = (user) => {
   return labels.includes('admin');
 };
 
+const fetchAccount = async (endpoint, project, jwt) => {
+  const baseUrl = String(endpoint).replace(/\/+$/, '');
+  const response = await fetch(`${baseUrl}/account`, {
+    method: 'GET',
+    headers: {
+      'X-Appwrite-Project': project,
+      'X-Appwrite-JWT': jwt
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('unauthenticated');
+  }
+
+  return response.json();
+};
+
 const authenticateUser = async (req) => {
   const endpoint = process.env.APPWRITE_ENDPOINT;
   const project = process.env.APPWRITE_PROJECT_ID;
@@ -528,12 +543,8 @@ const authenticateUser = async (req) => {
     return { error: 'unauthenticated' };
   }
 
-  const client = new Client();
-  client.setEndpoint(endpoint).setProject(project).setJWT(jwt);
-  const account = new Account(client);
-
   try {
-    const user = await account.get();
+    const user = await fetchAccount(endpoint, project, jwt);
     const headerUserId = getHeader(req, 'x-appwrite-user-id');
     if (headerUserId && user?.$id && headerUserId !== user.$id) {
       return { error: 'unauthenticated' };

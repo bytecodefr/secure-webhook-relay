@@ -420,13 +420,13 @@ const processMarkdownForDiscord = (markdown, limit, allowEveryone) => {
   let processed = String(markdown || '');
   processed = stripHtml(processed);
   processed = blockMentions(processed, allowEveryone);
-  processed = processed.replace(/^#{1,6}\\s*(.+)$/gm, '**$1**');
-  processed = processed.replace(/!\\[([^\\]]*)\\]\\(([^)]+)\\)/g, 'Image: $1 ($2)');
+  processed = processed.replace(/^#{1,6}\s*(.+)$/gm, '**$1**');
+  processed = processed.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, 'Image: $1 ($2)');
   processed = processed.trim();
 
   if (processed.length > limit) {
     const truncated = processed.substring(0, limit);
-    const lastParagraphBreak = truncated.lastIndexOf('\\n\\n');
+    const lastParagraphBreak = truncated.lastIndexOf('\n\n');
     if (lastParagraphBreak > limit * 0.7) {
       processed = truncated.substring(0, lastParagraphBreak);
     } else {
